@@ -21,21 +21,21 @@ class MultiQrcodeSelectPainter extends CustomPainter {
   final Function(Barcode barcode) onSelect;
 
   //store the barcode rect in the screen coordinate system
-  List<Map<Rect, Barcode>> _barcodesOnScreen = [];
+  final List<Map<Rect, Barcode>> _barcodesOnScreen = [];
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 16.0
-      ..color = Color.fromARGB(225, 79, 193, 154);
+      ..color = const Color.fromARGB(225, 79, 193, 154);
 
     final Paint paintWhite = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 3.0
-      ..color = Color.fromARGB(200, 255, 255, 255);
+      ..color = const Color.fromARGB(200, 255, 255, 255);
 
-    final Paint background = Paint()..color = Color(0x99000000);
+    final Paint background = Paint()..color = const Color(0x99000000);
 
     for (final Barcode barcode in barcodes) {
       final ParagraphBuilder builder = ParagraphBuilder(
@@ -56,60 +56,41 @@ class MultiQrcodeSelectPainter extends CustomPainter {
 
       final cornerPoints = barcode.cornerPoints;
       final boundingBox = barcode.boundingBox;
-      if (cornerPoints == null) {
-        if (boundingBox != null) {
-          left =
-              translateX(boundingBox.left, rotation, size, absoluteImageSize);
-          top = translateY(boundingBox.top, rotation, size, absoluteImageSize);
-          right =
-              translateX(boundingBox.right, rotation, size, absoluteImageSize);
-          bottom =
-              translateY(boundingBox.bottom, rotation, size, absoluteImageSize);
+      final List<Offset> offsetPoints = <Offset>[];
+      for (final point in cornerPoints) {
+        final double x =
+            translateX(point.x.toDouble(), rotation, size, absoluteImageSize);
+        final double y =
+            translateY(point.y.toDouble(), rotation, size, absoluteImageSize);
 
-          // Draw a bounding rectangle around the barcode
-          canvas.drawCircle(Offset(left, top), 3.0, paint);
-          // canvas.drawRect(
-          //   Rect.fromLTRB(left, top, right, bottom),
-          //   paint,
-          // );
-        }
-      } else {
-        final List<Offset> offsetPoints = <Offset>[];
-        for (final point in cornerPoints) {
-          final double x =
-              translateX(point.x.toDouble(), rotation, size, absoluteImageSize);
-          final double y =
-              translateY(point.y.toDouble(), rotation, size, absoluteImageSize);
+        offsetPoints.add(Offset(x, y));
 
-          offsetPoints.add(Offset(x, y));
-
-          // Due to possible rotations we need to find the smallest and largest
-          top = min(top, y);
-          bottom = max(bottom, y);
-          left = min(left, x);
-          right = max(right, x);
-        }
-        // Add the first point to close the polygon
-        canvas.drawCircle(
-            Offset(left + (right - left) / 2, top + (bottom - top) / 2),
-            20.0,
-            paint);
-
-        //draw arrow
-        canvas.drawLine(
-            Offset(left + (right - left) / 2 - 10, top + (bottom - top) / 2),
-            Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
-            paintWhite);
-        canvas.drawLine(
-            Offset(left + (right - left) / 2, top + (bottom - top) / 2 - 10),
-            Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
-            paintWhite);
-        canvas.drawLine(
-            Offset(left + (right - left) / 2, top + (bottom - top) / 2 + 10),
-            Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
-            paintWhite);
+        // Due to possible rotations we need to find the smallest and largest
+        top = min(top, y);
+        bottom = max(bottom, y);
+        left = min(left, x);
+        right = max(right, x);
       }
+      // Add the first point to close the polygon
+      canvas.drawCircle(
+          Offset(left + (right - left) / 2, top + (bottom - top) / 2),
+          20.0,
+          paint);
 
+      //draw arrow
+      canvas.drawLine(
+          Offset(left + (right - left) / 2 - 10, top + (bottom - top) / 2),
+          Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
+          paintWhite);
+      canvas.drawLine(
+          Offset(left + (right - left) / 2, top + (bottom - top) / 2 - 10),
+          Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
+          paintWhite);
+      canvas.drawLine(
+          Offset(left + (right - left) / 2, top + (bottom - top) / 2 + 10),
+          Offset(left + (right - left) / 2 + 10, top + (bottom - top) / 2),
+          paintWhite);
+    
       _barcodesOnScreen.add({
         Rect.fromLTRB(left, top, right, bottom): barcode,
       });

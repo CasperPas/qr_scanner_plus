@@ -24,15 +24,16 @@ class QrResultCache {
 }
 
 class QrScannerPlusView extends StatefulWidget {
-  bool debug = false;
-  bool multiCodeSelect = true;
+  final bool debug;
+  final bool multiCodeSelect;
   final Function(List<Barcode> barcode) onResult;
-  QrScannerPlusView(this.onResult,
+
+  const QrScannerPlusView(this.onResult,
       {this.debug = false, this.multiCodeSelect = true, Key? key})
       : super(key: key);
 
   @override
-  _BarcodeScannerViewState createState() => _BarcodeScannerViewState();
+  State<QrScannerPlusView> createState() => _BarcodeScannerViewState();
 }
 
 class _BarcodeScannerViewState extends State<QrScannerPlusView> {
@@ -44,7 +45,7 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
   CustomPaint? _customPaint2;
   CustomPaint? _customPaint3;
 
-  List<QrResultCache> _resultCache = [];
+  final List<QrResultCache> _resultCache = [];
   Timer? _timerCallbackResult;
   late CameraView _cameraView;
 
@@ -189,29 +190,29 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
             // print(
             //     "@@@ object.boundingBox.center: ${object.boundingBox.center}");
             // print(
-            //     "@@@ inputImage.inputImageData!.size: ${inputImage.inputImageData!.size}");
+            //     "@@@ inputImage.metadata!.size: ${inputImage.metadata!.size}");
             print(
                 "@@@ label index: ${label.index}, label: ${label.text}, confidence: ${label.confidence}");
-            Offset _focusPointOffset;
+            Offset focusPointOffset;
             if (Platform.isIOS) {
-              _focusPointOffset = Offset(
+              focusPointOffset = Offset(
                   object.boundingBox.center.dx /
-                      inputImage.inputImageData!.size.width,
+                      inputImage.metadata!.size.width,
                   object.boundingBox.center.dy /
-                      inputImage.inputImageData!.size.height);
+                      inputImage.metadata!.size.height);
             } else {
-              _focusPointOffset = Offset(
+              focusPointOffset = Offset(
                   object.boundingBox.center.dx /
-                      inputImage.inputImageData!.size.height,
+                      inputImage.metadata!.size.height,
                   object.boundingBox.center.dy /
-                      inputImage.inputImageData!.size.width);
+                      inputImage.metadata!.size.width);
             }
 
             // print("@@@ tmp: ${_focusPointOffset}");
             //if label is 2d  barcode, set the camera focus point
             if (label.index == 7) {
-              _cameraView.setCameraFocusPoint(_focusPointOffset);
-              Future.delayed(Duration(milliseconds: 300), () {
+              _cameraView.setCameraFocusPoint(focusPointOffset);
+              Future.delayed(const Duration(milliseconds: 300), () {
                 if (mounted) {
                   _cameraView.zoomIn();
                 }
@@ -224,10 +225,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
       if (widget.debug == true && mounted) {
         setState(() {
           _customPaint = CustomPaint(
-              painter: ObjectDetectorPainter(
-                  objects,
-                  inputImage.inputImageData!.imageRotation,
-                  inputImage.inputImageData!.size));
+              painter: ObjectDetectorPainter(objects,
+                  inputImage.metadata!.rotation, inputImage.metadata!.size));
         });
       }
     } else {
@@ -250,15 +249,15 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
 
       if (resultCache.isNotEmpty) {
         if (widget.debug == true) {
-          if (inputImage.inputImageData?.size != null &&
-              inputImage.inputImageData?.imageRotation != null &&
+          if (inputImage.metadata?.size != null &&
+              inputImage.metadata?.rotation != null &&
               mounted) {
             setState(() {
               _customPaint2 = CustomPaint(
                   painter: BarcodeDetectorDebugPainter(
                       resultCache,
-                      inputImage.inputImageData!.size,
-                      inputImage.inputImageData!.imageRotation));
+                      inputImage.metadata!.size,
+                      inputImage.metadata!.rotation));
             });
           }
         }
@@ -271,8 +270,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
               _customPaint3 = CustomPaint(
                   painter: MultiQrcodeSelectPainter(
                       resultCache,
-                      inputImage.inputImageData!.size,
-                      inputImage.inputImageData!.imageRotation,
+                      inputImage.metadata!.size,
+                      inputImage.metadata!.rotation,
                       onMultiSelect));
             });
           }
@@ -283,8 +282,8 @@ class _BarcodeScannerViewState extends State<QrScannerPlusView> {
             _customPaint3 = CustomPaint(
                 painter: MultiQrcodeSelectPainter(
                     resultCache,
-                    inputImage.inputImageData!.size,
-                    inputImage.inputImageData!.imageRotation,
+                    inputImage.metadata!.size,
+                    inputImage.metadata!.rotation,
                     onMultiSelect));
           });
           widget.onResult.call(resultCache);

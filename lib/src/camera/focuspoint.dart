@@ -7,8 +7,9 @@ import 'package:sensors_plus/sensors_plus.dart';
 import '../events.dart';
 
 class FocusPoint extends StatefulWidget {
-  CameraController cameraController;
   FocusPoint(this.cameraController, {Key? key}) : super(key: key);
+
+  final CameraController cameraController;
   bool _hide = false;
 
   resetFocusPoint() {
@@ -105,7 +106,7 @@ class _FocusPointState extends State<FocusPoint> {
     if (widget.cameraController.value.isInitialized == true) {
       await widget.cameraController.setFocusMode(FocusMode.locked);
 
-      print("@@@ setFocusPoint: ${point}");
+      print("@@@ setFocusPoint: $point");
 
       widget.cameraController.setFocusPoint(point);
 
